@@ -42,7 +42,7 @@ export default function Topbar({ onOpenSidebar }: Props) {
                 <div className="flex items-center gap-3">
                     <div className="text-right hidden sm:block">
                         <p className="text-sm font-medium text-gray-800">
-                            James Boonmee
+                            xxxxxxxxxxxxxx
                         </p>
                         <p className="text-xs text-gray-400">
                             Supervisor
