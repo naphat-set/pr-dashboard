@@ -4,91 +4,189 @@ import { useState } from "react";
 import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
 
-interface Item {
+type Item = {
     name: string;
     qty: number;
     price: number;
+};
+
+const departments = [
+    "Cloud Operations",
+    "Software Development",
+    "DevOps / Platform",
+    "Cybersecurity",
+    "Data & Analytics",
+];
+
+const budgetCodes = [
+    "Software Subscriptions",
+    "IT Equipment",
+    "Cloud Services",
+    "Security Tools",
+    "Data Platform",
+];
+
+interface Props {
+    onSubmit: (data: any) => void;
+    onClose: () => void;
 }
 
-export default function PRForm() {
+export default function PRForm({ onSubmit }: Props) {
     const [title, setTitle] = useState("");
-    const [costCenter, setCostCenter] = useState("");
-    const [items, setItems] = useState<Item[]>([]);
+    const [priority, setPriority] = useState("Normal");
+    const [department, setDepartment] = useState("");
+    const [budget, setBudget] = useState("");
 
-    // 🟢 add item
+    const [items, setItems] = useState<Item[]>([
+        { name: "", qty: 1, price: 0 },
+    ]);
+
     const addItem = () => {
         setItems([...items, { name: "", qty: 1, price: 0 }]);
     };
 
-    // 🟢 update item
     const updateItem = (
-        index: number,
-        field: keyof Item,
+        i: number,
+        field: "name" | "qty" | "price",
         value: string | number
     ) => {
         const newItems = [...items];
-        (newItems[index][field] as any) = value;
+        (newItems[i] as any)[field] = value;
         setItems(newItems);
     };
 
-    // 🟢 remove item
-    const removeItem = (index: number) => {
-        setItems(items.filter((_, i) => i !== index));
+    const total = items.reduce(
+        (sum, i) => sum + i.qty * i.price,
+        0
+    );
+
+    const handleCreate = () => {
+        onSubmit({
+            name: title,
+            department,
+            requester: "You",
+            amount: total,
+            status: "submitted",
+        });
     };
 
-    const total = items.reduce((sum, i) => sum + i.qty * i.price, 0);
+    const handleDraft = () => {
+        onSubmit({
+            name: title,
+            department,
+            requester: "You",
+            amount: total,
+            status: "draft",
+        });
+    };
 
     return (
         <div className="space-y-6">
-            {/* ================= BASIC INFO ================= */}
-            <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-                <h3 className="font-semibold">Basic Information</h3>
 
-                {/* 📱 responsive grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 🟢 BASIC */}
+            <div>
+                <p className="text-sm font-semibold mb-3">
+                    Basic Information
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4">
+
                     <Input
-                        label="PR Title"
-                        placeholder="Enter title"
+                        label="Purchase Request Title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                     />
 
-                    <Input
-                        label="Cost Center"
-                        placeholder="Enter cost center"
-                        value={costCenter}
-                        onChange={(e) => setCostCenter(e.target.value)}
-                    />
+                    {/* 🟢 priority */}
+                    <div>
+                        <label className="text-sm mb-1 block">
+                            Priority Level
+                        </label>
+
+                        <div className="flex gap-2">
+                            {["Normal", "Urgent", "Critical"].map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setPriority(p)}
+                                    className={`px-3 py-2 rounded-md text-sm
+                    ${priority === p
+                                            ? "bg-green-500 text-white"
+                                            : "bg-gray-100"
+                                        }
+                  `}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            {/* ================= ITEMS ================= */}
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">Items</h3>
+            {/* 🟢 BUDGET */}
+            <div>
+                <p className="text-sm font-semibold mb-3">
+                    Budget Assignment
+                </p>
 
-                    <Button onClick={addItem}>+ Add Item</Button>
+                <div className="grid md:grid-cols-2 gap-4">
+
+                    <select
+                        className="border rounded-lg p-2"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                    >
+                        <option>Department</option>
+                        {departments.map((d) => (
+                            <option key={d}>{d}</option>
+                        ))}
+                    </select>
+
+                    <select
+                        className="border rounded-lg p-2"
+                        value={budget}
+                        onChange={(e) => setBudget(e.target.value)}
+                    >
+                        <option>Budget Code</option>
+                        {budgetCodes.map((b) => (
+                            <option key={b}>{b}</option>
+                        ))}
+                    </select>
+
+                </div>
+            </div>
+
+            {/* 🟢 LINE ITEM */}
+            <div>
+                <div className="flex justify-between items-center mb-2">
+                    <p className="text-sm font-semibold">
+                        Line Item
+                    </p>
+
+                    <Button onClick={addItem}>
+                        + Add Item
+                    </Button>
                 </div>
 
-                {/* 📱 table responsive */}
                 <div className="border rounded-lg overflow-x-auto">
-                    <table className="min-w-[600px] w-full text-sm">
-                        <thead className="bg-gray-100 text-left">
+                    <table className="w-full text-sm">
+
+                        <thead className="bg-gray-50">
                             <tr>
-                                <th className="p-2">Item</th>
+                                <th className="p-2 text-left">Description</th>
                                 <th>Qty</th>
-                                <th>Price</th>
+                                <th>Unit Price</th>
                                 <th>Total</th>
-                                <th></th>
                             </tr>
                         </thead>
 
                         <tbody>
                             {items.map((item, i) => (
                                 <tr key={i} className="border-t">
-                                    <td className="p-2 min-w-[200px]">
+
+                                    <td className="p-2">
                                         <Input
-                                            placeholder="Item name"
                                             value={item.name}
                                             onChange={(e) =>
                                                 updateItem(i, "name", e.target.value)
@@ -96,7 +194,7 @@ export default function PRForm() {
                                         />
                                     </td>
 
-                                    <td className="min-w-[100px]">
+                                    <td>
                                         <Input
                                             type="number"
                                             value={item.qty}
@@ -106,7 +204,7 @@ export default function PRForm() {
                                         />
                                     </td>
 
-                                    <td className="min-w-[120px]">
+                                    <td>
                                         <Input
                                             type="number"
                                             value={item.price}
@@ -116,34 +214,43 @@ export default function PRForm() {
                                         />
                                     </td>
 
-                                    <td className="px-2 whitespace-nowrap">
+                                    <td className="px-2">
                                         {(item.qty * item.price).toLocaleString()}
                                     </td>
 
-                                    <td className="px-2">
-                                        <button
-                                            onClick={() => removeItem(i)}
-                                            className="text-red-500 text-sm"
-                                        >
-                                            Remove
-                                        </button>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
+
                     </table>
                 </div>
             </div>
 
-            {/* ================= SUMMARY ================= */}
-            <div className="flex justify-end">
-                <div className="bg-gray-50 px-4 py-3 rounded-lg text-right">
-                    <p className="text-sm text-gray-500">Total</p>
-                    <p className="text-lg font-semibold">
-                        {total.toLocaleString()} THB
-                    </p>
-                </div>
+            {/* 🟢 TOTAL */}
+            <div className="text-right">
+                <p className="text-sm text-gray-500">
+                    Request Total
+                </p>
+
+                <p className="text-lg font-semibold text-blue-600">
+                    {total.toLocaleString()} THB
+                </p>
             </div>
+
+            {/* 🟢 FOOTER */}
+            <div className="flex justify-end gap-2">
+                <Button
+                    className="bg-gray-200 text-black"
+                    onClick={handleDraft}
+                >
+                    Save as Draft
+                </Button>
+
+                <Button onClick={handleCreate}>
+                    Create PR
+                </Button>
+            </div>
+
         </div>
     );
 }

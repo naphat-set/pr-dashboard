@@ -3,21 +3,27 @@
 type Props = {
     children: React.ReactNode;
     onClick?: () => void;
+    className?: string;
 };
 
-export default function Button({ children, onClick }: Props) {
+export default function Button({
+    children,
+    onClick,
+    className = "",
+}: Props) {
     return (
         <button
             onClick={onClick}
-            className="
-        w-full
+            className={`
         bg-green-500
         text-white
-        p-3
+        px-4 py-2          
         rounded-lg
         hover:bg-green-600
         transition
-      "
+
+        ${className}       /* 🟢 allow custom */
+      `}
         >
             {children}
         </button>
