@@ -1,17 +1,24 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
 
+// ✅ schema
+const schema = z.object({
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(1, "Password is required"),
+});
+
+type FormData = z.infer<typeof schema>;
+
 function LogoIcon() {
     return (
-        <svg
-            className="w-9 h-9 text-green-600"
-            viewBox="0 0 40 40"
-            fill="none"
-        >
+        <svg className="w-9 h-9 text-green-600" viewBox="0 0 40 40" fill="none">
             <path
                 d="M3.33331 16.6667C4.63331 10.3067 9.44998 5.21671 15.6766 3.48337C16.2 3.33837 16.46 3.26504 16.6016 3.42004C16.7433 3.57671 16.6383 3.83337 16.4316 4.35004L15 7.50004M23.3333 3.33337C29.6933 4.63337 34.7833 9.45004 36.5166 15.6767C36.6616 16.2 36.735 16.46 36.58 16.6017C36.4233 16.7434 36.1666 16.6384 35.65 16.4317L32.5 15M36.6666 23.3334C35.3666 29.6934 30.55 34.7834 24.3233 36.5167C23.8 36.6617 23.54 36.735 23.3983 36.58C23.2566 36.4234 23.3616 36.1667 23.5683 35.65L25 32.5M16.6666 36.6667C10.3066 35.3667 5.21665 30.55 3.48331 24.3234C3.33831 23.8 3.26498 23.54 3.41998 23.3984C3.57665 23.2567 3.83331 23.3617 4.34998 23.5684L7.49998 25"
                 stroke="currentColor"
@@ -30,18 +37,25 @@ function LogoIcon() {
 }
 
 export default function LoginForm() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const router = useRouter();
 
-    const handleLogin = () => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<FormData>({
+        resolver: zodResolver(schema),
+    });
+
+    const onSubmit = (data: FormData) => {
+        // 🔥 ตอนนี้ยัง mock อยู่
         router.push("/dashboard");
     };
 
     return (
         <div className="h-screen flex flex-col overflow-hidden bg-white">
 
-            {/* 🔹 Topbar */}
+            {/* Topbar */}
             <div className="h-[60px] flex items-center px-6 border-b border-gray-200 shrink-0">
                 <div className="flex items-center gap-3">
                     <LogoIcon />
@@ -56,22 +70,20 @@ export default function LoginForm() {
                 </div>
             </div>
 
-            {/* 🔹 Content */}
+            {/* Content */}
             <div className="flex flex-1 min-h-0">
 
-                {/* 🖼️ Image */}
+                {/* Image */}
                 <div className="hidden md:block md:w-1/2 relative">
                     <img
                         src="/images/login_image.png"
                         alt="login"
                         className="absolute inset-0 w-full h-full object-cover object-[50%_0]"
                     />
-
-                    {/* overlay */}
                     <div className="absolute inset-0 bg-white/10" />
                 </div>
 
-                {/* 🧾 Form */}
+                {/* Form */}
                 <div className="w-full md:w-1/2 flex items-center justify-center px-6 md:px-12 overflow-y-auto">
                     <div className="w-full max-w-[360px] space-y-5">
 
@@ -85,29 +97,39 @@ export default function LoginForm() {
                             </p>
                         </div>
 
-                        {/* Email */}
-                        <div className="space-y-1">
-                            <label className="text-sm text-gray-700">E-mail</label>
-                            <Input
-                                placeholder="E-mail"
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
+                        {/* 🔥 FORM */}
+                        <form
+                            onSubmit={handleSubmit(onSubmit)}
+                            className="space-y-4"
+                        >
 
-                        {/* Password */}
-                        <div className="space-y-1">
-                            <label className="text-sm text-gray-700">Password</label>
-                            <Input
-                                type="password"
-                                placeholder="Password"
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
+                            {/* Email */}
+                            <div>
+                                <Input
+                                    label="E-mail"
+                                    placeholder="E-mail"
+                                    {...register("email")}
+                                    error={errors.email?.message}
+                                />
+                            </div>
 
-                        {/* Button */}
-                        <Button onClick={handleLogin}>
-                            Login
-                        </Button>
+                            {/* Password */}
+                            <div>
+                                <Input
+                                    label="Password"
+                                    type="password"
+                                    placeholder="Password"
+                                    {...register("password")}
+                                    error={errors.password?.message}
+                                />
+                            </div>
+
+                            {/* Button */}
+                            <Button type="submit">
+                                Login
+                            </Button>
+
+                        </form>
 
                     </div>
                 </div>

@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
 
-type Item = {
-    name: string;
-    qty: number;
-    price: number;
-};
+// ✅ schema
+const schema = z.object({
+    title: z.string().min(1, "Title is required"),
+    priority: z.string(),
+    department: z.string().min(1, "Select department"),
+    items: z.array(
+        z.object({
+            name: z.string().min(1, "Item name required"),
+            qty: z.number().min(1, "Qty must be at least 1"),
+            price: z.number().optional(),
+        })
+    ),
+});
+
+type FormData = z.infer<typeof schema>;
 
 const departments = [
     "Cloud Operations",
@@ -18,72 +31,55 @@ const departments = [
     "Data & Analytics",
 ];
 
-const budgetCodes = [
-    "Software Subscriptions",
-    "IT Equipment",
-    "Cloud Services",
-    "Security Tools",
-    "Data Platform",
-];
-
 interface Props {
     onSubmit: (data: any) => void;
     onClose: () => void;
 }
 
 export default function PRForm({ onSubmit }: Props) {
-    const [title, setTitle] = useState("");
-    const [priority, setPriority] = useState("Normal");
-    const [department, setDepartment] = useState("");
-    const [budget, setBudget] = useState("");
+    const {
+        register,
+        control,
+        handleSubmit,
+        watch,
+        setValue,
+        formState: { errors },
+    } = useForm<FormData>({
+        resolver: zodResolver(schema),
+        defaultValues: {
+            title: "",
+            priority: "Normal",
+            department: "",
+            items: [{ name: "", qty: 1, price: undefined }],
+        },
+    });
 
-    const [items, setItems] = useState<Item[]>([
-        { name: "", qty: 1, price: 0 },
-    ]);
+    const { fields, append } = useFieldArray({
+        control,
+        name: "items",
+    });
 
-    const addItem = () => {
-        setItems([...items, { name: "", qty: 1, price: 0 }]);
-    };
-
-    const updateItem = (
-        i: number,
-        field: "name" | "qty" | "price",
-        value: string | number
-    ) => {
-        const newItems = [...items];
-        (newItems[i] as any)[field] = value;
-        setItems(newItems);
-    };
+    const items = watch("items") || [];
 
     const total = items.reduce(
-        (sum, i) => sum + i.qty * i.price,
+        (sum, i) => sum + (i?.qty || 0) * (i?.price || 0),
         0
     );
 
-    const handleCreate = () => {
+    const submitHandler = (data: FormData, status: "draft" | "submitted") => {
         onSubmit({
-            name: title,
-            department,
+            name: data.title,
+            department: data.department,
             requester: "You",
             amount: total,
-            status: "submitted",
-        });
-    };
-
-    const handleDraft = () => {
-        onSubmit({
-            name: title,
-            department,
-            requester: "You",
-            amount: total,
-            status: "draft",
+            status,
         });
     };
 
     return (
         <div className="space-y-6">
 
-            {/* 🟢 BASIC */}
+            {/* BASIC */}
             <div>
                 <p className="text-sm font-semibold mb-3">
                     Basic Information
@@ -91,13 +87,19 @@ export default function PRForm({ onSubmit }: Props) {
 
                 <div className="grid md:grid-cols-2 gap-4">
 
-                    <Input
-                        label="Purchase Request Title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                    />
+                    <div>
+                        <Input
+                            label="Purchase Request Title"
+                            {...register("title")}
+                        />
+                        {errors.title && (
+                            <p className="text-red-500 text-xs">
+                                {errors.title.message}
+                            </p>
+                        )}
+                    </div>
 
-                    {/* 🟢 priority */}
+                    {/* priority */}
                     <div>
                         <label className="text-sm mb-1 block">
                             Priority Level
@@ -106,14 +108,14 @@ export default function PRForm({ onSubmit }: Props) {
                         <div className="flex gap-2">
                             {["Normal", "Urgent", "Critical"].map((p) => (
                                 <button
+                                    type="button"
                                     key={p}
-                                    onClick={() => setPriority(p)}
+                                    onClick={() => setValue("priority", p)}
                                     className={`px-3 py-2 rounded-md text-sm
-                    ${priority === p
+                    ${watch("priority") === p
                                             ? "bg-green-500 text-white"
                                             : "bg-gray-100"
-                                        }
-                  `}
+                                        }`}
                                 >
                                     {p}
                                 </button>
@@ -124,47 +126,47 @@ export default function PRForm({ onSubmit }: Props) {
                 </div>
             </div>
 
-            {/* 🟢 BUDGET */}
+            {/* ✅ Department ครึ่ง (แก้ถูกจริง) */}
             <div>
                 <p className="text-sm font-semibold mb-3">
-                    Budget Assignment
+                    Department
                 </p>
 
+                {/* 🔥 KEY: ต้องใช้ grid */}
                 <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <select
+                            className="border rounded-lg p-2 w-full"
+                            {...register("department")}
+                        >
+                            <option value="">Select Department</option>
+                            {departments.map((d) => (
+                                <option key={d}>{d}</option>
+                            ))}
+                        </select>
 
-                    <select
-                        className="border rounded-lg p-2"
-                        value={department}
-                        onChange={(e) => setDepartment(e.target.value)}
-                    >
-                        <option>Department</option>
-                        {departments.map((d) => (
-                            <option key={d}>{d}</option>
-                        ))}
-                    </select>
-
-                    <select
-                        className="border rounded-lg p-2"
-                        value={budget}
-                        onChange={(e) => setBudget(e.target.value)}
-                    >
-                        <option>Budget Code</option>
-                        {budgetCodes.map((b) => (
-                            <option key={b}>{b}</option>
-                        ))}
-                    </select>
-
+                        {errors.department && (
+                            <p className="text-red-500 text-xs">
+                                {errors.department.message}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* 🟢 LINE ITEM */}
+            {/* LINE ITEM */}
             <div>
                 <div className="flex justify-between items-center mb-2">
                     <p className="text-sm font-semibold">
                         Line Item
                     </p>
 
-                    <Button onClick={addItem}>
+                    <Button
+                        type="button"
+                        onClick={() =>
+                            append({ name: "", qty: 1, price: undefined })
+                        }
+                    >
                         + Add Item
                     </Button>
                 </div>
@@ -182,40 +184,36 @@ export default function PRForm({ onSubmit }: Props) {
                         </thead>
 
                         <tbody>
-                            {items.map((item, i) => (
-                                <tr key={i} className="border-t">
+                            {fields.map((field, i) => (
+                                <tr key={field.id} className="border-t">
 
                                     <td className="p-2">
                                         <Input
-                                            value={item.name}
-                                            onChange={(e) =>
-                                                updateItem(i, "name", e.target.value)
-                                            }
+                                            {...register(`items.${i}.name`)}
                                         />
                                     </td>
 
                                     <td>
                                         <Input
                                             type="number"
-                                            value={item.qty}
-                                            onChange={(e) =>
-                                                updateItem(i, "qty", Number(e.target.value))
-                                            }
+                                            {...register(`items.${i}.qty`, {
+                                                valueAsNumber: true,
+                                            })}
                                         />
                                     </td>
 
                                     <td>
                                         <Input
                                             type="number"
-                                            value={item.price}
-                                            onChange={(e) =>
-                                                updateItem(i, "price", Number(e.target.value))
-                                            }
+                                            placeholder="Enter price"
+                                            {...register(`items.${i}.price`, {
+                                                valueAsNumber: true,
+                                            })}
                                         />
                                     </td>
 
                                     <td className="px-2">
-                                        {(item.qty * item.price).toLocaleString()}
+                                        {((items[i]?.qty || 0) * (items[i]?.price || 0)).toLocaleString()}
                                     </td>
 
                                 </tr>
@@ -226,7 +224,7 @@ export default function PRForm({ onSubmit }: Props) {
                 </div>
             </div>
 
-            {/* 🟢 TOTAL */}
+            {/* TOTAL */}
             <div className="text-right">
                 <p className="text-sm text-gray-500">
                     Request Total
@@ -237,16 +235,24 @@ export default function PRForm({ onSubmit }: Props) {
                 </p>
             </div>
 
-            {/* 🟢 FOOTER */}
+            {/* FOOTER */}
             <div className="flex justify-end gap-2">
                 <Button
+                    type="button"
                     className="bg-gray-200 text-black"
-                    onClick={handleDraft}
+                    onClick={handleSubmit((data) =>
+                        submitHandler(data, "draft")
+                    )}
                 >
                     Save as Draft
                 </Button>
 
-                <Button onClick={handleCreate}>
+                <Button
+                    type="button"
+                    onClick={handleSubmit((data) =>
+                        submitHandler(data, "submitted")
+                    )}
+                >
                     Create PR
                 </Button>
             </div>

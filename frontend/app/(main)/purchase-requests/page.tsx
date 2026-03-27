@@ -9,6 +9,11 @@ export default function Page() {
     const [open, setOpen] = useState(false);
     const [prList, setPrList] = useState<any[]>([]);
 
+    // 🔥 เพิ่มอันนี้
+    const [active, setActive] = useState("all");
+
+    const tabs = ["all", "draft", "submitted", "approved", "rejected"];
+
     const handleSubmit = (data: any) => {
         setPrList((prev) => [
             ...prev,
@@ -19,6 +24,11 @@ export default function Page() {
         ]);
         setOpen(false);
     };
+
+    const filtered =
+        active === "all"
+            ? prList
+            : prList.filter((i) => i.status === active);
 
     return (
         <div className="space-y-4 md:space-y-6">
@@ -37,8 +47,27 @@ export default function Page() {
                 </Button>
             </div>
 
-            {/* table */}
-            <PRTable data={prList} />
+            {/* 🔥 TABS */}
+            <div className="flex gap-2 flex-wrap">
+                {tabs.map((t) => (
+                    <button
+                        key={t}
+                        onClick={() => setActive(t)}
+                        className={`px-4 py-1.5 text-sm rounded-full capitalize
+              ${active === t
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                    >
+                        {t === "all"
+                            ? "All PR"
+                            : `${t} (${prList.filter(i => i.status === t).length})`}
+                    </button>
+                ))}
+            </div>
+
+            {/* 🔥 ส่ง active ไป table */}
+            <PRTable data={filtered} />
 
             {/* modal */}
             <PRModal

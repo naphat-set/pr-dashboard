@@ -1,15 +1,12 @@
 "use client";
 
-type Props = {
-    children: React.ReactNode;
-    onClick?: () => void;
-    className?: string;
-};
+type Props = React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 export default function Button({
     children,
     onClick,
     className = "",
+    ...props
 }: Props) {
     return (
         <button
@@ -22,8 +19,9 @@ export default function Button({
         hover:bg-green-600
         transition
 
-        ${className}       /* 🟢 allow custom */
+        ${className}
       `}
+            {...props} // 🔥 สำคัญมาก
         >
             {children}
         </button>
