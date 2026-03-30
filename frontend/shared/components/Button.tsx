@@ -8,20 +8,21 @@ export default function Button({
     className = "",
     ...props
 }: Props) {
+
+    const base = "px-4 py-2 rounded-lg transition";
+    const defaultStyle = "bg-green-500 text-white hover:bg-green-600";
+
+    // 🔥 ถ้ามี bg- อยู่ใน className → ไม่ใช้ default
+    const isCustom = className.includes("bg-");
+
     return (
         <button
             onClick={onClick}
             className={`
-        bg-green-500
-        text-white
-        px-4 py-2          
-        rounded-lg
-        hover:bg-green-600
-        transition
-
-        ${className}
-      `}
-            {...props} // 🔥 สำคัญมาก
+                ${base}
+                ${isCustom ? className : `${defaultStyle} ${className}`}
+            `}
+            {...props}
         >
             {children}
         </button>

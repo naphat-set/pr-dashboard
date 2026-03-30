@@ -266,7 +266,7 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
                         {/* CLOSE */}
                         <Button
                             type="button"
-                            className="bg-gray-200 text-black"
+                            className="bg-[#E2E8F0] text-black"
                             onClick={onClose}
                         >
                             Close
