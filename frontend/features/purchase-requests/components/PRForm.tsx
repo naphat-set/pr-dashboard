@@ -34,9 +34,14 @@ const departments = [
 interface Props {
     onSubmit: (data: any) => void;
     onClose: () => void;
+
+    // ✅ NEW: ใช้เช็คว่าเป็น edit mode
+    initialData?: any;
 }
 
-export default function PRForm({ onSubmit }: Props) {
+export default function PRForm({ onSubmit, onClose, initialData }: Props) {
+
+    // 🔥 useForm
     const {
         register,
         control,
@@ -46,14 +51,26 @@ export default function PRForm({ onSubmit }: Props) {
         formState: { errors },
     } = useForm<FormData>({
         resolver: zodResolver(schema),
-        defaultValues: {
-            title: "",
-            priority: "Normal",
-            department: "",
-            items: [{ name: "", qty: 1, price: undefined }],
-        },
+
+        // ✅ ถ้ามี initialData = edit mode
+        defaultValues: initialData
+            ? {
+                title: initialData.name,
+                priority: "Normal",
+                department: initialData.department,
+                items: initialData.items || [
+                    { name: "", qty: 1, price: undefined }
+                ],
+            }
+            : {
+                title: "",
+                priority: "Normal",
+                department: "",
+                items: [{ name: "", qty: 1, price: undefined }],
+            },
     });
 
+    // 🔥 dynamic items
     const { fields, append } = useFieldArray({
         control,
         name: "items",
@@ -61,11 +78,13 @@ export default function PRForm({ onSubmit }: Props) {
 
     const items = watch("items") || [];
 
+    // 🔥 total calculation
     const total = items.reduce(
         (sum, i) => sum + (i?.qty || 0) * (i?.price || 0),
         0
     );
 
+    // ✅ submit function (ใช้ทั้ง create + edit)
     const submitHandler = (data: FormData, status: "draft" | "submitted") => {
         onSubmit({
             name: data.title,
@@ -73,6 +92,9 @@ export default function PRForm({ onSubmit }: Props) {
             requester: "You",
             amount: total,
             status,
+
+            // 🔥 KEY FIX: เก็บ items จริง
+            items: data.items,
         });
     };
 
@@ -87,6 +109,7 @@ export default function PRForm({ onSubmit }: Props) {
 
                 <div className="grid md:grid-cols-2 gap-4">
 
+                    {/* TITLE */}
                     <div>
                         <Input
                             label="Purchase Request Title"
@@ -99,7 +122,7 @@ export default function PRForm({ onSubmit }: Props) {
                         )}
                     </div>
 
-                    {/* priority */}
+                    {/* PRIORITY */}
                     <div>
                         <label className="text-sm mb-1 block">
                             Priority Level
@@ -112,7 +135,7 @@ export default function PRForm({ onSubmit }: Props) {
                                     key={p}
                                     onClick={() => setValue("priority", p)}
                                     className={`px-3 py-2 rounded-md text-sm
-                    ${watch("priority") === p
+                                    ${watch("priority") === p
                                             ? "bg-green-500 text-white"
                                             : "bg-gray-100"
                                         }`}
@@ -126,13 +149,12 @@ export default function PRForm({ onSubmit }: Props) {
                 </div>
             </div>
 
-            {/* ✅ Department ครึ่ง (แก้ถูกจริง) */}
+            {/* DEPARTMENT */}
             <div>
                 <p className="text-sm font-semibold mb-3">
                     Department
                 </p>
 
-                {/* 🔥 KEY: ต้องใช้ grid */}
                 <div className="grid md:grid-cols-2 gap-4">
                     <div>
                         <select
@@ -237,24 +259,78 @@ export default function PRForm({ onSubmit }: Props) {
 
             {/* FOOTER */}
             <div className="flex justify-end gap-2">
-                <Button
-                    type="button"
-                    className="bg-gray-200 text-black"
-                    onClick={handleSubmit((data) =>
-                        submitHandler(data, "draft")
-                    )}
-                >
-                    Save as Draft
-                </Button>
 
-                <Button
-                    type="button"
-                    onClick={handleSubmit((data) =>
-                        submitHandler(data, "submitted")
-                    )}
-                >
-                    Create PR
-                </Button>
+                {/* ✅ EDIT MODE */}
+                {initialData ? (
+                    <>
+                        {/* CLOSE */}
+                        <Button
+                            type="button"
+                            className="bg-gray-200 text-black"
+                            onClick={onClose}
+                        >
+                            Close
+                        </Button>
+
+                        {/* 🔥 ถ้าเป็น draft */}
+                        {initialData.status === "draft" ? (
+                            <>
+                                {/* SAVE AS DRAFT */}
+                                <Button
+                                    type="button"
+                                    className="bg-gray-200 text-black"
+                                    onClick={handleSubmit((data) =>
+                                        submitHandler(data, "draft")
+                                    )}
+                                >
+                                    Save as Draft
+                                </Button>
+
+                                {/* CREATE PR */}
+                                <Button
+                                    type="button"
+                                    onClick={handleSubmit((data) =>
+                                        submitHandler(data, "submitted")
+                                    )}
+                                >
+                                    Create PR
+                                </Button>
+                            </>
+                        ) : (
+                            /* 🔥 ถ้าไม่ใช่ draft */
+                            <Button
+                                type="button"
+                                onClick={handleSubmit((data) =>
+                                    submitHandler(data, "submitted")
+                                )}
+                            >
+                                Edit
+                            </Button>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        <Button
+                            type="button"
+                            className="bg-gray-200 text-black"
+                            onClick={handleSubmit((data) =>
+                                submitHandler(data, "draft")
+                            )}
+                        >
+                            Save as Draft
+                        </Button>
+
+                        <Button
+                            type="button"
+                            onClick={handleSubmit((data) =>
+                                submitHandler(data, "submitted")
+                            )}
+                        >
+                            Create PR
+                        </Button>
+                    </>
+                )}
+
             </div>
 
         </div>

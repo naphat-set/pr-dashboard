@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-
-export default function PRTable({ data = [] }: any) {
+import { Pencil, Trash2 } from "lucide-react";
+export default function PRTable({ data = [], onDelete, onEdit }: any) {
     const [currentPage, setCurrentPage] = useState(1);
 
     const pageSize = 10;
@@ -89,9 +89,25 @@ export default function PRTable({ data = [] }: any) {
 
                                 {/* ACTION */}
                                 <td className="px-6">
-                                    <button className="text-gray-400 hover:text-black text-sm">
-                                        Details
-                                    </button>
+                                    <div className="flex gap-3">
+
+                                        {/* EDIT ICON */}
+                                        <button
+                                            onClick={() => onEdit(item)}
+                                            className="text-gray-500 hover:text-black"
+                                        >
+                                            <Pencil size={18} />
+                                        </button>
+
+                                        {/* DELETE ICON */}
+                                        <button
+                                            onClick={() => onDelete(item.id)}
+                                            className="text-gray-500 hover:text-black"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+
+                                    </div>
                                 </td>
 
                             </tr>
