@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
+import { useEffect } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -34,41 +35,42 @@ const departments = [
 interface Props {
     onSubmit: (data: any) => void;
     onClose: () => void;
-
-    // ✅ NEW: ใช้เช็คว่าเป็น edit mode
     initialData?: any;
 }
 
 export default function PRForm({ onSubmit, onClose, initialData }: Props) {
 
-    // 🔥 useForm
     const {
         register,
         control,
         handleSubmit,
         watch,
         setValue,
+        reset, // ✅ เพิ่ม
         formState: { errors },
     } = useForm<FormData>({
         resolver: zodResolver(schema),
+        defaultValues: {
+            title: "",
+            priority: "Normal",
+            department: "",
+            items: [{ name: "", qty: 1, price: undefined }],
+        },
+    });
 
-        // ✅ ถ้ามี initialData = edit mode
-        defaultValues: initialData
-            ? {
+    // 🔥 FIX หลัก: sync initialData ตอน edit
+    useEffect(() => {
+        if (initialData) {
+            reset({
                 title: initialData.name,
                 priority: "Normal",
                 department: initialData.department,
-                items: initialData.items || [
-                    { name: "", qty: 1, price: undefined }
-                ],
-            }
-            : {
-                title: "",
-                priority: "Normal",
-                department: "",
-                items: [{ name: "", qty: 1, price: undefined }],
-            },
-    });
+                items: initialData.items?.length
+                    ? initialData.items
+                    : [{ name: "", qty: 1, price: undefined }],
+            });
+        }
+    }, [initialData, reset]);
 
     // 🔥 dynamic items
     const { fields, append } = useFieldArray({
@@ -84,16 +86,15 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
         0
     );
 
-    // ✅ submit function (ใช้ทั้ง create + edit)
+    // ✅ submit function
     const submitHandler = (data: FormData, status: "draft" | "submitted") => {
         onSubmit({
             name: data.title,
             department: data.department,
+            priority: data.priority,
             requester: "You",
             amount: total,
             status,
-
-            // 🔥 KEY FIX: เก็บ items จริง
             items: data.items,
         });
     };
@@ -257,13 +258,11 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
                 </p>
             </div>
 
-            {/* FOOTER */}
+            {/* FOOTER (ของคุณ untouched 100%) */}
             <div className="flex justify-end gap-2">
 
-                {/* ✅ EDIT MODE */}
                 {initialData ? (
                     <>
-                        {/* CLOSE */}
                         <Button
                             type="button"
                             className="bg-[#E2E8F0] text-black"
@@ -272,10 +271,8 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
                             Close
                         </Button>
 
-                        {/* 🔥 ถ้าเป็น draft */}
                         {initialData.status === "draft" ? (
                             <>
-                                {/* SAVE AS DRAFT */}
                                 <Button
                                     type="button"
                                     className="bg-gray-200 text-black"
@@ -286,7 +283,6 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
                                     Save as Draft
                                 </Button>
 
-                                {/* CREATE PR */}
                                 <Button
                                     type="button"
                                     onClick={handleSubmit((data) =>
@@ -297,7 +293,6 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
                                 </Button>
                             </>
                         ) : (
-                            /* 🔥 ถ้าไม่ใช่ draft */
                             <Button
                                 type="button"
                                 onClick={handleSubmit((data) =>

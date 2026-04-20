@@ -99,7 +99,15 @@ VALUES ($1, $2, $3, $4, $5, $6, NOW())
 
     async updatePR(id: number, body: any) {
         const { title, department, priority, status, items } = body;
-
+        console.log("UPDATE PR DEBUG:");
+        console.log({
+            id,
+            title,
+            department,
+            priority,
+            status,
+            items
+        });
         const currentResult = await pool.query(
             `SELECT status FROM purchase_requests WHERE id = $1`,
             [id]
@@ -134,15 +142,16 @@ VALUES ($1, $2, $3, $4, $5, $6, NOW())
 
         const result = await pool.query(
             `
-      UPDATE purchase_requests
-      SET title = $1,
-          department = $2,
-          priority = $3,
-          total = $4
-      WHERE id = $5
-      RETURNING *
-      `,
-            [title, department, priority, total, id],
+  UPDATE purchase_requests
+  SET title = $1,
+      department = $2,
+      priority = $3,
+      total = $4,
+      status = $5
+  WHERE id = $6
+  RETURNING *
+  `,
+            [title, department, priority, total, status, id]
         );
 
         await pool.query(
