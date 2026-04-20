@@ -7,7 +7,7 @@ interface Props {
     onClose: () => void;
     onSubmit: (data: any) => void;
 
-    // ✅ NEW: ถ้ามี = edit mode / ไม่มี = create mode
+    // ✅ ถ้ามี = edit mode / ไม่มี = create mode
     initialData?: any;
 }
 

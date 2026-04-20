@@ -54,7 +54,7 @@ export default function GaugeChartCard() {
                                     />
 
                                     <RadialBar
-                                        background // 👈 ตัวนี้สำคัญ ทำให้มีวงเทา
+                                        background
                                         dataKey="value"
                                         cornerRadius={10}
                                     />

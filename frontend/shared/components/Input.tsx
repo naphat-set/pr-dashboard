@@ -29,7 +29,7 @@ const Input = React.forwardRef<HTMLInputElement, Props>(
 
                 {/* INPUT */}
                 <input
-                    ref={ref} // 🔥 สำคัญสุด
+                    ref={ref}
                     className={`
             w-full
             border
@@ -46,7 +46,7 @@ const Input = React.forwardRef<HTMLInputElement, Props>(
 
             ${props.disabled ? "bg-gray-100 cursor-not-allowed" : ""}
           `}
-                    {...props} // 🔥 สำคัญสุด
+                    {...props}
                 />
 
                 {/* ERROR */}

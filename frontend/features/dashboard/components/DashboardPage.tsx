@@ -1,5 +1,3 @@
-// 📁 features/dashboard/components/DashboardPage.tsx
-
 import DashboardGrid from "./layout/DashboardGrid";
 import StatCard from "./cards/StatCard";
 import BoilerPanel from "./panels/BoilerPanel";

@@ -46,7 +46,7 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
         handleSubmit,
         watch,
         setValue,
-        reset, // ✅ เพิ่ม
+        reset,
         formState: { errors },
     } = useForm<FormData>({
         resolver: zodResolver(schema),
