@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginApi } from "../services/auth.service";
 
 import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
@@ -47,9 +48,22 @@ export default function LoginForm() {
         resolver: zodResolver(schema),
     });
 
-    const onSubmit = (data: FormData) => {
-        // 🔥 ตอนนี้ยัง mock อยู่
-        router.push("/dashboard");
+    const onSubmit = async (data: FormData) => {
+        try {
+            const res = await loginApi(data.email, data.password);
+
+            // 🔥 เก็บ token
+            localStorage.setItem("token", res.access_token);
+
+            // (optional) เก็บ user
+            localStorage.setItem("user", JSON.stringify(res.user));
+
+            router.push("/dashboard");
+
+        } catch (error) {
+            alert("Login failed");
+            console.error(error);
+        }
     };
 
     return (
