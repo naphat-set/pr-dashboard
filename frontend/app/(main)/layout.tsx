@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/shared/components/Sidebar";
 import Topbar from "@/shared/components/Topbar";
 
@@ -10,6 +11,23 @@ export default function MainLayout({
     children: React.ReactNode;
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            router.replace("/login");
+        } else {
+            setIsLoading(false);
+        }
+    }, [router]);
+
+    // กัน flash หน้าก่อน redirect
+    if (isLoading) {
+        return null;
+    }
 
     return (
         <div className="flex h-screen overflow-hidden">
