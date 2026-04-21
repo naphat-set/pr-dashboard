@@ -1,26 +1,84 @@
-# PR Dashboard (Frontend Practice)
+# 🚀 PR Dashboard (Fullstack Practice)
 
-This project is a frontend practice for a Purchase Request (PR) system, built based on a design (Figma) as part of an assignment.
+A **Purchase Request (PR) management system** built as a practice project to simulate a real-world workflow.
+
+This project was initially developed as a **frontend-focused implementation**, and later extended into a fullstack application to explore backend development.
+
+---
 
 ## 🛠 Tech Stack
 
+### Frontend (Primary)
+
 * Next.js (App Router)
-* Tailwind CSS
 * TypeScript
+* Tailwind CSS
 
-## ✨ What’s implemented
+### Backend (Learning / Secondary)
 
-* Login page UI (mock)
-* Dashboard layout with cards and charts (UI only)
-* Purchase Request page (basic structure)
-* Component-based structure
+* NestJS
+* PostgreSQL
+* JWT Authentication
 
-## ⚠️ Note
+---
 
-This project currently focuses on **frontend only**.
-Backend, authentication, and database are not implemented yet.
+## ✨ Features
 
-## ▶️ How to run
+### 🔐 Authentication
+
+* Login with JWT
+* Protected routes (frontend + backend)
+
+### 📦 Purchase Request System
+
+* Create / Edit / Delete PR
+* Add multiple items per PR
+* Automatic total calculation
+
+### 🎨 UI / UX
+
+* Modal form for PR creation
+* Dynamic item inputs
+* Status filtering
+* Confirm before delete
+* Responsive layout
+
+---
+
+## 🧠 My Role & Learning
+
+### 💡 Frontend (Main Focus)
+
+* Built UI from design (Figma)
+* Structured scalable components and pages
+* Managed state and user interactions
+
+### ⚙️ Backend (Learning Experience)
+
+* Designed basic REST API with NestJS
+* Implemented CRUD operations
+* Worked with PostgreSQL and relational data
+* Implemented JWT authentication
+
+> This is my **first fullstack project**, where I explored backend development beyond my usual frontend work.
+
+---
+
+## 📊 System Overview
+
+```text
+Frontend (Next.js)
+        ↓ (JWT)
+Backend (NestJS)
+        ↓ (SQL)
+Database (PostgreSQL)
+```
+
+---
+
+## ▶️ Getting Started
+
+### Frontend
 
 ```bash
 cd frontend
@@ -28,12 +86,33 @@ npm install
 npm run dev
 ```
 
-Then open: http://localhost:3000
+### Backend
 
-## 📌 Purpose
+```bash
+cd backend
+npm install
+npm run start:dev
+```
 
-This project was created to practice frontend development and UI implementation.
+---
+
+## 📌 Notes
+
+* Frontend is my **primary strength**
+* Backend in this project was built as a **learning step**
+* Able to work with backend when needed, but focused on frontend development
+
+---
+
+## 🚀 Future Improvements
+
+* Refresh token (better authentication flow)
+* Role-based access control
+* Pagination (backend)
+* Improved validation and error handling
+
+---
 
 ## 👨‍💻 Author
 
-Naphat Sethabutr
+**Naphat Sethabutr**
