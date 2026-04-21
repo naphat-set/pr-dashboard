@@ -80,6 +80,19 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
 
     const items = watch("items") || [];
 
+    // ✅ ✅ ✅ NEW: check item complete
+    const isItemComplete = (item: any) => {
+        return (
+            item?.name?.trim() !== "" &&
+            item?.qty > 0 &&
+            item?.price !== undefined &&
+            item?.price > 0
+        );
+    };
+
+    const lastItem = items[items.length - 1];
+    const canAdd = isItemComplete(lastItem);
+
     // 🔥 total calculation
     const total = items.reduce(
         (sum, i) => sum + (i?.qty || 0) * (i?.price || 0),
@@ -88,6 +101,14 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
 
     // ✅ submit function
     const submitHandler = (data: FormData, status: "draft" | "submitted") => {
+
+        // 🔒 กันพลาดตอน submit อีกรอบ
+        const isAllValid = data.items.every(isItemComplete);
+        if (!isAllValid) {
+            alert("Please complete all items before submitting");
+            return;
+        }
+
         onSubmit({
             name: data.title,
             department: data.department,
@@ -186,13 +207,22 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
 
                     <Button
                         type="button"
-                        onClick={() =>
-                            append({ name: "", qty: 1, price: undefined })
-                        }
+                        onClick={() => {
+                            if (!canAdd) return;
+                            append({ name: "", qty: 1, price: undefined });
+                        }}
+                        disabled={!canAdd}
                     >
                         + Add Item
                     </Button>
                 </div>
+
+                {/* 🔥 ต้องอยู่ตรงนี้ */}
+                {!canAdd && (
+                    <p className="text-xs text-red-500 mb-2">
+                        Please fill Description, Qty and Price first
+                    </p>
+                )}
 
                 <div className="border rounded-lg overflow-x-auto">
                     <table className="w-full text-sm">
@@ -258,7 +288,7 @@ export default function PRForm({ onSubmit, onClose, initialData }: Props) {
                 </p>
             </div>
 
-            {/* FOOTER (ของคุณ untouched 100%) */}
+            {/* FOOTER */}
             <div className="flex justify-end gap-2">
 
                 {initialData ? (
