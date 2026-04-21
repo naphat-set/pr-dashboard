@@ -4,6 +4,8 @@ A **Purchase Request (PR) management system** built as a practice project to sim
 
 This project was initially developed as a **frontend-focused implementation**, and later extended into a fullstack application to explore backend development.
 
+Built with Next.js, NestJS, and PostgreSQL, featuring JWT authentication, protected routes, and full CRUD operations.
+
 ---
 
 ## 🛠 Tech Stack
@@ -112,6 +114,19 @@ npm run start:dev
 * Improved validation and error handling
 
 ---
+
+## 📸 Preview
+
+### Dashboard
+![Dashboard](frontend/public/images/dashboard.png)
+
+### Purchase Request Page
+![PR Page](frontend/public/images/pr-page.png)
+
+### Create PR Modal
+![Create Modal](frontend/public/images/create-modal.png)
+---
+
 
 ## 👨‍💻 Author
 
