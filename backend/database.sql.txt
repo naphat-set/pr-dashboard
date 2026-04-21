@@ -13,41 +13,56 @@ CREATE TABLE users (
 
 CREATE TABLE purchase_requests (
   id SERIAL PRIMARY KEY,
-  pr_code VARCHAR(50) UNIQUE, 
+  -- pr_code VARCHAR(50) UNIQUE, -- optional (ยังไม่ได้ใช้)
+
   title VARCHAR(255) NOT NULL,
   department VARCHAR(100),
-  priority VARCHAR(20) DEFAULT 'normal',
-  status VARCHAR(50) DEFAULT 'draft',
+
+  priority VARCHAR(20)
+    CHECK (priority IN ('normal','urgent','critical'))
+    DEFAULT 'normal',
+
+  status VARCHAR(50)
+    CHECK (status IN ('draft','submitted','approved','rejected'))
+    DEFAULT 'draft',
+
   total DECIMAL(12,2) DEFAULT 0,
-  created_by INT,
+
+  created_by INT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
 
 CREATE TABLE pr_items (
   id SERIAL PRIMARY KEY,
   pr_id INT,
+
   description VARCHAR(255),
   quantity INT,
   price DECIMAL(10,2),
   total DECIMAL(12,2),
-  FOREIGN KEY (pr_id) REFERENCES purchase_requests(id)
+
+  FOREIGN KEY (pr_id)
+    REFERENCES purchase_requests(id)
+    ON DELETE CASCADE
 );
 
 -- =========================
 -- INSERT USERS
 -- =========================
 
+-- ⚠️ IMPORTANT:
+-- password ต้องเป็น bcrypt hash
+-- example: bcrypt.hash('1234', 10)
+
 INSERT INTO users (email, password, first_name, last_name)
 VALUES 
-('test1@gmail.com', '1234', 'Test1', 'User1'),
-('test2@gmail.com', '1234', 'Test2', 'User2');
-
--- ⚠️ หมายเหตุ:
--- password ตรงนี้ควรเป็น bcrypt ในระบบจริง
+('test1@gmail.com', '$2b$10$examplehash...', 'Test1', 'User1'),
+('test2@gmail.com', '$2b$10$examplehash...', 'Test2', 'User2');
 
 -- =========================
--- INSERT PR (ไม่มี pr_code ❗)
+-- INSERT PR
 -- =========================
 
 INSERT INTO purchase_requests 
